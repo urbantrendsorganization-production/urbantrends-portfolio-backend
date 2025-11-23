@@ -9,17 +9,22 @@ if (!uri) {
   console.error("MONGO_URI is not defined in environment variables");
 }
 
-const client = new MongoClient(uri);
+let db; // store the database instance
 
 async function connectDatabase() {
-    try {
-        await client.connect();
-        console.log("Connected to MongoDB");
-    } catch (error) {
-        console.error("Failed to connect to MongoDB", error);
-    } finally {
-        await client.close();
-    }
+  try {
+    if (db) return db; // reuse the connection
+
+    const client = await MongoClient.connect(uri);
+    console.log("Connected to MongoDB");
+
+    db = client.db("ecommerce_db"); // your DB name
+    return db;
+
+  } catch (error) {
+    console.error("Failed to connect to MongoDB", error);
+    throw error;
+  }
 }
 
 export default connectDatabase;
